@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import './FavoritesScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// Playlist Screen
 class PlaylistScreen extends StatefulWidget {
   final String mood;
 
@@ -18,7 +19,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   @override
   void initState() {
     super.initState();
-    _loadPlaylists(); // Load the playlist based on mood
+    _loadPlaylists(); // Load the playlist data based on mood
   }
 
   Future<void> _loadPlaylists() async {
@@ -26,10 +27,26 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     final String response = await rootBundle.loadString('assets/playlists.json');
     final Map<String, dynamic> data = jsonDecode(response);
 
-    // Update state with playlists for the selected mood
     setState(() {
       _playlists = data[widget.mood] ?? []; // Default to empty list if no match
     });
+  }
+
+  Future<void> _addToFavorites(Map<String, String> playlist) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Fetch existing favorites (or start with an empty list)
+    final String? existingFavorites = prefs.getString('favorites');
+    List<dynamic> favorites = existingFavorites != null ? jsonDecode(existingFavorites) : [];
+
+    // Add the new favorite (if not already added)
+    if (!favorites.any((item) => item['name'] == playlist['name'])) {
+      favorites.add(playlist);
+      await prefs.setString('favorites', jsonEncode(favorites)); // Save back to SharedPreferences
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Added to Favorites!")));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Already in Favorites!")));
+    }
   }
 
   @override
@@ -37,6 +54,17 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.mood} Playlists'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.favorite),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FavoritesScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: _playlists.isEmpty
           ? const Center(child: CircularProgressIndicator()) // Show loading
@@ -49,34 +77,20 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
             child: ListTile(
               title: Text(playlist['name']),
               subtitle: Text(playlist['artist']),
-              trailing: const Icon(Icons.play_arrow),
-              onTap: () {
-                _showSongDetails(context, playlist['name'], playlist['url']);
-              },
+              trailing: IconButton(
+                icon: const Icon(Icons.favorite_border),
+                onPressed: () {
+                  _addToFavorites({
+                    'name': playlist['name'],
+                    'artist': playlist['artist'],
+                    'mood': widget.mood,
+                  });
+                },
+              ),
             ),
           );
         },
       ),
-    );
-  }
-
-  void _showSongDetails(BuildContext context, String name, String url) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(name),
-          content: Text('Link: $url'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Close'),
-            )
-          ],
-        );
-      },
     );
   }
 }
