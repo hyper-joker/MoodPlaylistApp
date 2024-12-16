@@ -1,0 +1,19 @@
+{
+  "Happy": [
+    {"name": "Happy", "artist": "Pharrell Williams", "url": "https://www.youtube.com/watch?v=ZbZSe6N_BXs&ab_channel=PharrellWilliamsVEVO"},
+    {"name": "Feel Good Inc.", "artist": "Gorillaz", "url": "https://www.youtube.com/watch?v=HyHNuVaZJ-k&ab_channel=Gorillaz"}
+  ],
+  "Sad": [
+    {"name": "Someone Like You", "artist": "Adele", "url": "https://www.youtube.com/watch?v=hLQl3WQQoQ0&ab_channel=AdeleVEVO"},
+    {"name": "Hurt", "artist": "Johnny Cash", "url": "https://www.youtube.com/watch?v=8AHCfZTRGiI&ab_channel=JohnnyCashVEVO"}
+  ],
+  "Hopeful": [
+    {"name": "Don't Stop Believin'", "artist": "Journey", "url": "https://www.youtube.com/watch?v=1k8craCGpgs&ab_channel=journeyVEVO"},
+    {"name": "Rise Up", "artist": "Andra Day", "url": "https://www.youtube.com/watch?v=lwgr_IMeEgA&ab_channel=AndraDay"}
+  ],
+  "Angry": [
+    {"name": "Killing In The Name", "artist": "Rage Against The Machine", "url": "https://www.youtube.com/watch?v=bWXazVhlyxQ&ab_channel=RATMVEVO"},
+    {"name": "Break Stuff", "artist": "Limp Bizkit", "url": "https://www.youtube.com/watch?v=ZpUYjpKg9KY&ab_channel=LimpBizkitVEVO"}
+  ]
+}
+
