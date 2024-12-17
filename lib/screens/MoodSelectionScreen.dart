@@ -44,7 +44,6 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
               DropdownMenuItem(value: "Sad", child: Text("Sad")),
               DropdownMenuItem(value: "Hopeful", child: Text("Hopeful")),
               DropdownMenuItem(value: "Angry", child: Text("Angry")),
-              DropdownMenuItem(value: "Chill", child: Text("Chill")),
             ],
             onChanged: (value) {
               setState(() {
