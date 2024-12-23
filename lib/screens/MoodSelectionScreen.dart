@@ -1,9 +1,8 @@
-import 'dart:convert';
+// MoodSelectionScreen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import './PlaylistScreen.dart';
+import '../api/AuthURL.dart';
+import '../api/TokenStorage.dart';
 
-// Mood Selection Screen
 class MoodSelectionScreen extends StatefulWidget {
   const MoodSelectionScreen({Key? key}) : super(key: key);
 
@@ -13,10 +12,27 @@ class MoodSelectionScreen extends StatefulWidget {
 
 class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
   String? selectedMood;
+  bool isUserAuthenticated = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    setState(() {
+      isUserAuthenticated = SpotifyAuth().isAuthenticated();
+    });
+
+    authStateController.stream.listen((token) {
+      setState(() {
+        isUserAuthenticated = token != null;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Mood Playlist App')),
       backgroundColor: Colors.blueAccent[100],
       body: Column(
         children: [
@@ -28,10 +44,7 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
             child: const Center(
               child: Text(
                 "How are you feeling?",
-                style: TextStyle(
-                  fontSize: 26,
-                  color: Colors.white,
-                ),
+                style: TextStyle(fontSize: 26, color: Colors.white),
               ),
             ),
           ),
@@ -49,17 +62,14 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
               setState(() {
                 selectedMood = value;
               });
-
-              if (value != null) {
-                // Navigate to the playlist screen with the selected mood
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PlaylistScreen(mood: value),
-                  ),
-                );
-              }
             },
+          ),
+          const SizedBox(height: 50),
+          ElevatedButton(
+            onPressed: isUserAuthenticated
+                ? null
+                : () => SpotifyAuth().authenticateWithSpotify(),
+            child: Text(isUserAuthenticated ? 'Connected to Spotify' : 'Connect to Spotify'),
           ),
         ],
       ),

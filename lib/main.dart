@@ -1,9 +1,12 @@
-import 'dart:convert';
+// main.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import './screens/MoodSelectionScreen.dart';
+import './api/CallbackHandler.dart';
+import './api/AuthURL.dart';
 
-void main() => runApp(const MoodPlaylistApp());
+void main() {
+  runApp(const MoodPlaylistApp());
+}
 
 class MoodPlaylistApp extends StatelessWidget {
   const MoodPlaylistApp({super.key});
@@ -11,13 +14,13 @@ class MoodPlaylistApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Mood Based Playlist',
+      title: 'Mood Playlist App',
       theme: ThemeData(primarySwatch: Colors.teal),
-      home: const MoodSelectionScreen(),
+      initialRoute: SpotifyAuth().isCallbackUrl() ? '/callback' : '/',
+      routes: {
+        '/': (context) => const MoodSelectionScreen(),
+        '/callback': (context) => const CallbackHandler(),
+      },
     );
   }
 }
-
-
-
-
