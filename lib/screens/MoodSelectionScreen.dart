@@ -1,6 +1,7 @@
 // MoodSelectionScreen.dart
 import 'package:flutter/material.dart';
 import '../api/AuthURL.dart';
+import 'PlaylistScreen.dart';
 import '../api/TokenStorage.dart';
 
 class MoodSelectionScreen extends StatefulWidget {
@@ -64,6 +65,20 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
               });
             },
           ),
+          ElevatedButton(
+            onPressed: selectedMood != null
+                ? () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PlaylistScreen(mood: selectedMood!),
+                ),
+              );
+            }
+                : null,
+            child: const Text('Find Playlist'),
+          ),
+
           const SizedBox(height: 50),
           ElevatedButton(
             onPressed: isUserAuthenticated

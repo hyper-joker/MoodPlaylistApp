@@ -1,8 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import './FavoritesScreen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../api/AuthURL.dart';
 
 class PlaylistScreen extends StatefulWidget {
   final String mood;
@@ -14,80 +11,65 @@ class PlaylistScreen extends StatefulWidget {
 }
 
 class _PlaylistScreenState extends State<PlaylistScreen> {
-  List<dynamic> _playlists = [];
+  List<Map<String, String>> _tracks = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadPlaylists(); // Load the playlist data based on mood
+    _fetchPlaylist();
   }
 
-  Future<void> _loadPlaylists() async {
-    // Load JSON data
-    final String response = await rootBundle.loadString('assets/playlists.json');
-    final Map<String, dynamic> data = jsonDecode(response);
-
+  Future<void> _fetchPlaylist() async {
     setState(() {
-      _playlists = data[widget.mood] ?? []; // Default to empty list if no match
+      _isLoading = true;
     });
-  }
 
-  Future<void> _addToFavorites(Map<String, String> playlist) async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      // Search for a playlist by mood
+      final playlist = await SpotifyAuth().searchPlaylist(widget.mood);
+      if (playlist != null) {
+        final playlistId = playlist['id'];
 
-    // Fetch existing favorites (or start with an empty list)
-    final String? existingFavorites = prefs.getString('favorites');
-    List<dynamic> favorites = existingFavorites != null ? jsonDecode(existingFavorites) : [];
+        // Fetch the tracks from the playlist
+        final tracks = await SpotifyAuth().getPlaylistTracks(playlistId);
 
-    // Add the new favorite (if not already added)
-    if (!favorites.any((item) => item['name'] == playlist['name'])) {
-      favorites.add(playlist);
-      await prefs.setString('favorites', jsonEncode(favorites)); // Save back to SharedPreferences
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Added to Favorites!")));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Already in Favorites!")));
+        setState(() {
+          _tracks = tracks;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+          _tracks = [];
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error fetching playlist or tracks: $e');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.mood} Playlists'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FavoritesScreen()),
-              );
-            },
-          ),
-        ],
+        title: Text('${widget.mood} Playlist'),
       ),
-      body: _playlists.isEmpty
-          ? const Center(child: CircularProgressIndicator()) // Show loading
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _tracks.isEmpty
+          ? const Center(child: Text("No playlist found for this mood!"))
           : ListView.builder(
-        itemCount: _playlists.length,
+        itemCount: _tracks.length,
         itemBuilder: (context, index) {
-          final playlist = _playlists[index];
-          return Card(
-            margin: const EdgeInsets.all(8.0),
-            child: ListTile(
-              title: Text(playlist['name']),
-              subtitle: Text(playlist['artist']),
-              trailing: IconButton(
-                icon: const Icon(Icons.favorite_border),
-                onPressed: () {
-                  _addToFavorites({
-                    'name': playlist['name'],
-                    'artist': playlist['artist'],
-                    'mood': widget.mood,
-                  });
-                },
-              ),
-            ),
+          final track = _tracks[index];
+          return ListTile(
+            title: Text(track['name']!),
+            subtitle: Text(track['artist']!),
           );
         },
       ),
