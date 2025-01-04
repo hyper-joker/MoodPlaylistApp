@@ -41,7 +41,7 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
                       bottomLeft: Radius.circular(25), 
                       bottomRight: Radius.circular(25),
                     ),              
-                  )
+                  ),
                   child: const Center(
                     child: Text(
                       "How are you feeling?",
