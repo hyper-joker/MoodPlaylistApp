@@ -39,7 +39,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
     // Save the updated list back to SharedPreferences
     await prefs.setString('favorites', jsonEncode(_favorites));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Removed from Favorites!")));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("Removed from Favorites!")));
   }
 
   @override
@@ -48,26 +49,68 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       appBar: AppBar(
         title: const Text('Favorites'),
       ),
-      body: _favorites.isEmpty
-          ? const Center(child: Text("No favorites added yet!"))
-          : ListView.builder(
-        itemCount: _favorites.length,
-        itemBuilder: (context, index) {
-          final favorite = _favorites[index];
-          return Card(
-            margin: const EdgeInsets.all(8.0),
-            child: ListTile(
-              title: Text(favorite['name']),
-              subtitle: Text('Mood: ${favorite['mood']}'),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () {
-                  _removeFromFavorites(favorite['name']);
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFB0E0E6),
+              Color(0xFF4682B4),
+            ],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+          ),
+        ),
+        child: _favorites.isEmpty
+            ? const Center(child: Text("No favorites added yet!"))
+            : ListView.builder(
+                itemCount: _favorites.length,
+                itemBuilder: (context, index) {
+                  final favorite = _favorites[index];
+                  return Card(
+                    margin: const EdgeInsets.all(8.0),
+                    color: Colors.white38,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 4,
+                    child: ListTile(
+                      title: Text(favorite['name'],
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(
+                                offset: Offset(1, 1),
+                                blurRadius: 2,
+                                color: Colors.black26,
+                              ),
+                            ],
+                          )),
+                      subtitle: Text(
+                        'Mood: ${favorite['mood']}',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(1, 1),
+                              blurRadius: 2,
+                              color: Colors.black26,
+                            ),
+                          ],
+                        ),
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.white),
+                        onPressed: () {
+                          _removeFromFavorites(favorite['name']);
+                        },
+                      ),
+                    ),
+                  );
                 },
               ),
-            ),
-          );
-        },
       ),
     );
   }
