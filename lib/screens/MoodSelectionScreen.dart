@@ -5,7 +5,7 @@ import './PlaylistScreen.dart';
 
 // Mood Selection Screen
 class MoodSelectionScreen extends StatefulWidget {
-  const MoodSelectionScreen({Key? key}) : super(key: key);
+  const MoodSelectionScreen({super.key});
 
   @override
   State<MoodSelectionScreen> createState() => _MoodSelectionScreenState();

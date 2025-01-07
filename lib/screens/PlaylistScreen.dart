@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PlaylistScreen extends StatefulWidget {
   final String mood;
 
-  const PlaylistScreen({Key? key, required this.mood}) : super(key: key);
+  const PlaylistScreen({super.key, required this.mood});
 
   @override
   State<PlaylistScreen> createState() => _PlaylistScreenState();
@@ -24,7 +24,8 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
   Future<void> _loadPlaylists() async {
     // Load JSON data
-    final String response = await rootBundle.loadString('assets/playlists.json');
+    final String response =
+        await rootBundle.loadString('assets/playlists.json');
     final Map<String, dynamic> data = jsonDecode(response);
 
     setState(() {
@@ -37,15 +38,19 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
     // Fetch existing favorites (or start with an empty list)
     final String? existingFavorites = prefs.getString('favorites');
-    List<dynamic> favorites = existingFavorites != null ? jsonDecode(existingFavorites) : [];
+    List<dynamic> favorites =
+        existingFavorites != null ? jsonDecode(existingFavorites) : [];
 
     // Add the new favorite (if not already added)
     if (!favorites.any((item) => item['name'] == playlist['name'])) {
       favorites.add(playlist);
-      await prefs.setString('favorites', jsonEncode(favorites)); // Save back to SharedPreferences
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Added to Favorites!")));
+      await prefs.setString(
+          'favorites', jsonEncode(favorites)); // Save back to SharedPreferences
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Added to Favorites!")));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Already in Favorites!")));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Already in Favorites!")));
     }
   }
 
@@ -60,7 +65,8 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const FavoritesScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const FavoritesScreen()),
               );
             },
           ),
@@ -69,28 +75,28 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
       body: _playlists.isEmpty
           ? const Center(child: CircularProgressIndicator()) // Show loading
           : ListView.builder(
-        itemCount: _playlists.length,
-        itemBuilder: (context, index) {
-          final playlist = _playlists[index];
-          return Card(
-            margin: const EdgeInsets.all(8.0),
-            child: ListTile(
-              title: Text(playlist['name']),
-              subtitle: Text(playlist['artist']),
-              trailing: IconButton(
-                icon: const Icon(Icons.favorite_border),
-                onPressed: () {
-                  _addToFavorites({
-                    'name': playlist['name'],
-                    'artist': playlist['artist'],
-                    'mood': widget.mood,
-                  });
-                },
-              ),
+              itemCount: _playlists.length,
+              itemBuilder: (context, index) {
+                final playlist = _playlists[index];
+                return Card(
+                  margin: const EdgeInsets.all(8.0),
+                  child: ListTile(
+                    title: Text(playlist['name']),
+                    subtitle: Text(playlist['artist']),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.favorite_border),
+                      onPressed: () {
+                        _addToFavorites({
+                          'name': playlist['name'],
+                          'artist': playlist['artist'],
+                          'mood': widget.mood,
+                        });
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }

@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import './screens/MoodSelectionScreen.dart';
 
 void main() => runApp(const MoodPlaylistApp());
@@ -17,7 +15,3 @@ class MoodPlaylistApp extends StatelessWidget {
     );
   }
 }
-
-
-
-
