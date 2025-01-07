@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../api/AuthURL.dart';
 import 'PlaylistScreen.dart';
 import '../api/TokenStorage.dart';
+import 'FavoritesScreen.dart';
 
 class MoodSelectionScreen extends StatefulWidget {
   const MoodSelectionScreen({Key? key}) : super(key: key);
@@ -54,10 +55,10 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
             value: selectedMood,
             hint: const Text("Select your mood"),
             items: const [
+              DropdownMenuItem(value: "Party", child: Text("Party")),
               DropdownMenuItem(value: "Happy", child: Text("Happy")),
               DropdownMenuItem(value: "Sad", child: Text("Sad")),
-              DropdownMenuItem(value: "Hopeful", child: Text("Hopeful")),
-              DropdownMenuItem(value: "Angry", child: Text("Angry")),
+              DropdownMenuItem(value: "Chill", child: Text("Chill")),
             ],
             onChanged: (value) {
               setState(() {
@@ -78,7 +79,18 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
                 : null,
             child: const Text('Find Playlist'),
           ),
-
+          const SizedBox(height: 20), // Add some spacing
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FavoritesScreen(),
+                ),
+              );
+            },
+            child: const Text('Go to Favorites'),
+          ),
           const SizedBox(height: 50),
           ElevatedButton(
             onPressed: isUserAuthenticated
