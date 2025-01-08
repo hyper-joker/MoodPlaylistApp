@@ -12,12 +12,9 @@ class MoodPlaylistApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Mood Based Playlist',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.teal),
       home: const MoodSelectionScreen(),
     );
   }
 }
-
-
-
-
