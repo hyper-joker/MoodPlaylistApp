@@ -12,7 +12,6 @@ class MoodPlaylistApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: 'Mood Based Playlist',
       theme: ThemeData(
           textTheme: GoogleFonts.latoTextTheme().apply(
@@ -23,3 +22,7 @@ class MoodPlaylistApp extends StatelessWidget {
     );
   }
 }
+
+
+
+

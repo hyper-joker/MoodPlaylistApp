@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PlaylistScreen extends StatefulWidget {
   final String mood;
 
-  const PlaylistScreen({Key? key, required this.mood}) : super(key: key);
+  const PlaylistScreen({super.key, required this.mood});
 
   @override
   State<PlaylistScreen> createState() => _PlaylistScreenState();
