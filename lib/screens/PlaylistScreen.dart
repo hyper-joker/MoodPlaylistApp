@@ -33,7 +33,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
       'mediumColor': Color.fromARGB(255, 143, 180, 143),
       'darkerColor': Color.fromARGB(255, 0, 59, 45),
     },
-    'Angry': {
+    'Party': {
       'lighterColor': Color.fromARGB(255, 255, 200, 200),
       'mediumColor': Color.fromARGB(255, 229, 153, 153),
       'darkerColor': Color.fromARGB(255, 176, 0, 32),
