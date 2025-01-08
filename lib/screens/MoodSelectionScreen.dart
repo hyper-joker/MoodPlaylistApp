@@ -6,6 +6,7 @@ import '../api/TokenStorage.dart';
 import 'FavoritesScreen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+// Mood Selection Screen
 class MoodSelectionScreen extends StatefulWidget {
   const MoodSelectionScreen({Key? key}) : super(key: key);
 
@@ -125,8 +126,7 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        PlaylistScreen(mood: selectedMood!),
+                    builder: (context) => PlaylistScreen(mood: value),
                   ),
                 );
               }
