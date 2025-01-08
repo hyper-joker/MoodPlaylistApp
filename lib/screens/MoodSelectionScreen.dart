@@ -28,11 +28,6 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final italicHeaderStyle = GoogleFonts.playfair(
-      fontSize: 30,
-      color: Colors.white,
-    );
-
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -61,7 +56,7 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
               child: Center(
                 child: Text(
                   "How are you feeling?",
-                  style: italicHeaderStyle,
+                  style: TextStyle(fontSize: 30),
                 ),
               ),
             ),
