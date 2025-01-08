@@ -437,4 +437,27 @@ class SpotifyAuth {
       throw Exception("Error removing track from favorites playlist: ${response.body}");
     }
   }
+  Future<void> deletePlaylist(String playlistId) async {
+    final accessToken = this.accessToken;
+    if (accessToken == null) throw Exception("User is not authenticated.");
+
+    final url = "https://api.spotify.com/v1/playlists/$playlistId/followers";
+
+    try {
+      final response = await http.delete(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception("Error deleting playlist: ${response.body}");
+      }
+    } catch (e) {
+      print('Error deleting playlist: $e');
+      rethrow;
+    }
+  }
 }

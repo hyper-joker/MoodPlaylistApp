@@ -1,36 +1,26 @@
-//Playlistscreen.dart
+// PlaylistScreen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import './FavoritesScreen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../api/AuthURL.dart';
+import './FavoritesScreen.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class PlaylistScreen extends StatefulWidget {
   final String mood;
 
-  PlaylistScreen({required this.mood});
+  const PlaylistScreen({required this.mood, Key? key}) : super(key: key);
 
   @override
   _PlaylistScreenState createState() => _PlaylistScreenState();
 }
 
-void _launchUrl(String url) async {
-  if (await canLaunch(url)) {
-    await launch(url);
-  } else {
-    throw 'Could not launch $url';
-  }
-}
-
 class _PlaylistScreenState extends State<PlaylistScreen> {
   List<Map<String, dynamic>> _tracks = [];
-  bool _isLoading = false;
+  bool _isLoading = true;
   String? _errorMessage;
-  String? _playlistId; // Store playlist ID to delete it
+  String? _playlistId;
 
   @override
   void initState() {
@@ -38,51 +28,48 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     _checkAndFetchPlaylist();
   }
 
-  Future<void> _addToFavorites(Map<String, dynamic> track) async {
-    final spotifyAuth = SpotifyAuth();
+  Future<void> _deletePlaylist() async {
+    // Show confirmation dialog
+    final bool? confirmDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Playlist'),
+          content: const Text('Are you sure you want to delete this playlist?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    );
 
-    try {
-      // First, try to find existing Favorites playlist
-      String? playlistId = await _getFavoritesPlaylistId();
+    if (confirmDelete == true && _playlistId != null) {
+      try {
+        final spotifyAuth = SpotifyAuth();
+        await spotifyAuth.deletePlaylist(_playlistId!);
 
-      // If no favorites playlist exists, create one on Spotify
-      if (playlistId == null) {
-        final userId = await spotifyAuth.getCurrentUserId();
-        if (userId == null) throw Exception("Failed to get user ID.");
-
-        // Create the playlist on Spotify
-        playlistId = await spotifyAuth.createFavoritesPlaylist();
-        if (playlistId == null) throw Exception("Failed to create Favorites playlist");
-      }
-
-      print('Adding track to playlist: $playlistId'); // Debug print
-      print('Track URI: ${track['uri']}'); // Debug print
-
-      // Add the track to the Spotify playlist
-      await spotifyAuth.addSongToFavoritesPlaylist(playlistId, track['uri']);
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Added to Favorites!"))
-      );
-    } catch (e, stackTrace) {
-      print('Error adding to favorites: $e'); // Debug print
-      print('Stack trace: $stackTrace'); // Debug print
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to add to Favorites. Error: $e"))
-      );
-    }
-  }
-
-  Future<String?> _getFavoritesPlaylistId() async {
-    final spotifyAuth = SpotifyAuth();
-    final playlists = await spotifyAuth.fetchUserPlaylists();
-
-    for (var playlist in playlists) {
-      print('Found playlist: ${playlist['name']}'); // Debug print
-      if (playlist['name'] == 'Favorites from Moods') {
-        return playlist['id'];
+        // Show success message and navigate back
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Playlist deleted successfully')),
+          );
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to delete playlist: $e')),
+          );
+        }
       }
     }
-    return null;
   }
 
   Future<void> _checkAndFetchPlaylist() async {
@@ -93,7 +80,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
     try {
       final playlistId = await _getPlaylistIdByName();
-      _playlistId = playlistId; // Save the playlist ID for deletion
+      _playlistId = playlistId;
 
       if (playlistId != null) {
         await _fetchTracksFromPlaylist(playlistId);
@@ -116,7 +103,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
       throw Exception("User is not authenticated.");
     }
 
-    const String url = "https://api.spotify.com/v1/me/playlists";
+    const url = "https://api.spotify.com/v1/me/playlists";
     final response = await http.get(
       Uri.parse(url),
       headers: {'Authorization': 'Bearer $accessToken'},
@@ -125,12 +112,6 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final playlists = data['items'] as List<dynamic>;
-  Future<void> _loadPlaylists() async {
-    // Load JSON data
-    final String response =
-        await rootBundle.loadString('assets/playlists.json');
-    final Map<String, dynamic> data = jsonDecode(response);
-
       final playlist = playlists.firstWhere(
             (p) => p['name'] == "${widget.mood} Playlist",
         orElse: () => null,
@@ -155,7 +136,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
     final playlistId =
     await spotifyAuth.createPlaylist(userId, "${widget.mood} Playlist");
-    _playlistId = playlistId; // Save the playlist ID for deletion
+    _playlistId = playlistId;
 
     if (playlistId == null) throw Exception("Failed to create playlist.");
 
@@ -173,17 +154,16 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   }
 
   Future<void> _fetchTracksFromPlaylist(String playlistId) async {
-    final String url =
-        "https://api.spotify.com/v1/playlists/$playlistId/tracks";
+    final spotifyAuth = SpotifyAuth();
+    final accessToken = spotifyAuth.accessToken;
+
+    if (accessToken == null) {
+      throw Exception("User is not authenticated.");
+    }
+
+    final url = "https://api.spotify.com/v1/playlists/$playlistId/tracks";
 
     try {
-      final spotifyAuth = SpotifyAuth();
-      final accessToken = spotifyAuth.accessToken;
-
-      if (accessToken == null) {
-        throw Exception("User is not authenticated.");
-      }
-
       final response = await http.get(
         Uri.parse(url),
         headers: {'Authorization': 'Bearer $accessToken'},
@@ -201,8 +181,8 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
               'artists': (track['artists'] as List<dynamic>)
                   .map((artist) => artist['name'])
                   .join(', '),
-              'url': track['external_urls']['spotify'], // Add track URL here
-              'uri': track['uri'], // Add track URI here
+              'url': track['external_urls']['spotify'],
+              'uri': track['uri'],
             };
           }).toList();
           _isLoading = false;
@@ -221,75 +201,52 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     }
   }
 
-  /// Deletes the playlist
-  Future<void> _deletePlaylist() async {
-    if (_playlistId == null) {
-      setState(() {
-        _errorMessage = "No playlist to delete.";
-      });
-      return;
-    }
-
-    setState(() {
-      _playlists = data[widget.mood] ?? []; // Default to empty list if no match
-    });
-  }
-
-  Future<void> _addToFavorites(Map<String, String> playlist) async {
-    final prefs = await SharedPreferences.getInstance();
-
-    // Fetch existing favorites (or start with an empty list)
-    final String? existingFavorites = prefs.getString('favorites');
-    List<dynamic> favorites =
-        existingFavorites != null ? jsonDecode(existingFavorites) : [];
-
-    // Add the new favorite (if not already added)
-    if (!favorites.any((item) => item['name'] == playlist['name'])) {
-      favorites.add(playlist);
-      await prefs.setString(
-          'favorites', jsonEncode(favorites)); // Save back to SharedPreferences
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Added to Favorites!")));
-    } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Already in Favorites!")));
-      _isLoading = true;
-      _errorMessage = null;
-    });
+  Future<void> _addToFavorites(Map<String, dynamic> track) async {
+    final spotifyAuth = SpotifyAuth();
 
     try {
-      final spotifyAuth = SpotifyAuth();
-      final accessToken = spotifyAuth.accessToken;
+      String? playlistId = await _getFavoritesPlaylistId();
 
-      if (accessToken == null) {
-        throw Exception("User is not authenticated.");
+      if (playlistId == null) {
+        playlistId = await spotifyAuth.createFavoritesPlaylist();
       }
 
-      final String url =
-          "https://api.spotify.com/v1/playlists/$_playlistId/followers";
-      final response = await http.delete(
-        Uri.parse(url),
-        headers: {'Authorization': 'Bearer $accessToken'},
+      if (playlistId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to create Favorites playlist.")),
+        );
+        return;
+      }
+      await spotifyAuth.addSongToFavoritesPlaylist(playlistId, track['uri']);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Added to Favorites!")),
       );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to add to Favorites. Error: $e")),
+      );
+    }
+  }
 
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        setState(() {
-          _tracks = [];
-          _playlistId = null;
-          _isLoading = false;
-          _errorMessage = "Playlist deleted successfully.";
-        });
-      } else {
-        setState(() {
-          _errorMessage = "Error deleting playlist: ${response.body}";
-          _isLoading = false;
-        });
+  Future<String?> _getFavoritesPlaylistId() async {
+    final spotifyAuth = SpotifyAuth();
+    final playlists = await spotifyAuth.fetchUserPlaylists();
+
+    for (var playlist in playlists) {
+      if (playlist['name'] == 'Favorites from Moods') {
+        return playlist['id'];
       }
-    } catch (error) {
-      setState(() {
-        _errorMessage = "Error deleting playlist: $error";
-        _isLoading = false;
-      });
+    }
+    return null;
+  }
+
+  void _launchUrl(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Could not launch URL")),
+      );
     }
   }
 
@@ -297,41 +254,33 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.delete, color: Colors.red),
-          onPressed: () async {
-            // Deleting playlist functionality remains unchanged
-            final shouldDelete = await showDialog<bool>(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: Text("Delete Playlist"),
-                  content: Text("Are you sure you want to delete this playlist?"),
-                  actions: [
-                    TextButton(
-                      child: Text("Cancel"),
-                      onPressed: () => Navigator.pop(context, false),
-                    ),
-                    TextButton(
-                      child: Text("Delete"),
-                      onPressed: () => Navigator.pop(context, true),
-                    ),
-                  ],
-                );
-              },
-            );
-
-            if (shouldDelete == true) {
-              await _deletePlaylist();
-            }
-          },
-        ),
         title: Text("${widget.mood} Playlist"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.favorite),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => FavoritesScreen()),
+              );
+            },
+
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: _deletePlaylist,
+          ),
+        ],
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
-          ? Center(child: Text(_errorMessage!, style: TextStyle(color: Colors.red)))
+          ? Center(
+        child: Text(
+          _errorMessage!,
+          style: const TextStyle(color: Colors.red),
+        ),
+      )
           : ListView.builder(
         itemCount: _tracks.length,
         itemBuilder: (context, index) {
@@ -343,20 +292,22 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 IconButton(
-                  icon: Icon(Icons.favorite, color: Colors.pink),
+                  icon: const Icon(Icons.favorite, color: Colors.pink),
                   onPressed: () {
                     _addToFavorites(track);
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.open_in_new, color: Colors.green),
+                  icon: const Icon(Icons.open_in_new, color: Colors.green),
                   onPressed: () {
                     final url = track['url'];
                     if (url != null) {
                       _launchUrl(url);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("URL not available for this track")),
+                        const SnackBar(
+                          content: Text("URL not available for this track"),
+                        ),
                       );
                     }
                   },
@@ -366,45 +317,6 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
           );
         },
       ),
-        title: Text('${widget.mood} Playlists'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const FavoritesScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: _playlists.isEmpty
-          ? const Center(child: CircularProgressIndicator()) // Show loading
-          : ListView.builder(
-              itemCount: _playlists.length,
-              itemBuilder: (context, index) {
-                final playlist = _playlists[index];
-                return Card(
-                  margin: const EdgeInsets.all(8.0),
-                  child: ListTile(
-                    title: Text(playlist['name']),
-                    subtitle: Text(playlist['artist']),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.favorite_border),
-                      onPressed: () {
-                        _addToFavorites({
-                          'name': playlist['name'],
-                          'artist': playlist['artist'],
-                          'mood': widget.mood,
-                        });
-                      },
-                    ),
-                  ),
-                );
-              },
-            ),
     );
   }
 }

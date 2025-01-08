@@ -17,19 +17,18 @@ class MoodPlaylistApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Mood Playlist App',
-      theme: ThemeData(primarySwatch: Colors.teal),
+      theme: ThemeData(
+          primarySwatch: Colors.teal,
+          textTheme: GoogleFonts.latoTextTheme().apply(
+              bodyColor: Colors.white,
+              displayColor: Colors.white,
+            )
+          ),
       initialRoute: SpotifyAuth().isCallbackUrl() ? '/callback' : '/',
       routes: {
         '/': (context) => const MoodSelectionScreen(),
         '/callback': (context) => const CallbackHandler(),
       },
-      title: 'Mood Based Playlist',
-      theme: ThemeData(
-          textTheme: GoogleFonts.latoTextTheme().apply(
-        bodyColor: Colors.white,
-        displayColor: Colors.white,
-      )),
-      home: const MoodSelectionScreen(),
     );
   }
 }

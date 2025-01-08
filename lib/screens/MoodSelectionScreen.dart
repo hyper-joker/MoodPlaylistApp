@@ -4,9 +4,7 @@ import '../api/AuthURL.dart';
 import 'PlaylistScreen.dart';
 import '../api/TokenStorage.dart';
 import 'FavoritesScreen.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import './PlaylistScreen.dart';
 
 class MoodSelectionScreen extends StatefulWidget {
   const MoodSelectionScreen({Key? key}) : super(key: key);
@@ -18,11 +16,13 @@ class MoodSelectionScreen extends StatefulWidget {
 class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
   String? selectedMood;
   bool isUserAuthenticated = false;
+  double _headerHeight = 0;
 
   @override
   void initState() {
     super.initState();
 
+    // Check Spotify authentication status
     setState(() {
       isUserAuthenticated = SpotifyAuth().isAuthenticated();
     });
@@ -32,12 +32,8 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
         isUserAuthenticated = token != null;
       });
     });
-  }
-  double _headerHeight = 0;
 
-  @override
-  void initState() {
-    super.initState();
+    // Animate the header height
     Future.delayed(const Duration(milliseconds: 300), () {
       setState(() {
         _headerHeight = 157;
@@ -47,25 +43,17 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final italicHeaderStyle = GoogleFonts.playfair(
+    final italicHeaderStyle = GoogleFonts.playfairDisplay(
       fontSize: 30,
       color: Colors.white,
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mood Playlist App')),
+      appBar: AppBar(
+        title: const Text('Mood Playlist App'),
+        backgroundColor: const Color.fromARGB(255, 29, 1, 76),
+      ),
       backgroundColor: Colors.blueAccent[100],
-      body: Column(
-        children: [
-          Container(
-            height: 157,
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 0, 24, 67),
-            ),
-            child: const Center(
-              child: Text(
-                "How are you feeling?",
-                style: TextStyle(fontSize: 26, color: Colors.white),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -79,6 +67,7 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
         ),
         child: Column(
           children: [
+            // Animated header
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut,
@@ -97,62 +86,17 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 158),
-          DropdownButton<String>(
-            value: selectedMood,
-            hint: const Text("Select your mood"),
-            items: const [
-              DropdownMenuItem(value: "Party", child: Text("Party")),
-              DropdownMenuItem(value: "Happy", child: Text("Happy")),
-              DropdownMenuItem(value: "Sad", child: Text("Sad")),
-              DropdownMenuItem(value: "Chill", child: Text("Chill")),
-            ],
-            onChanged: (value) {
-              setState(() {
-                selectedMood = value;
-              });
-            },
-          ),
-          ElevatedButton(
-            onPressed: selectedMood != null
-                ? () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PlaylistScreen(mood: selectedMood!),
-                ),
-              );
-            }
-                : null,
-            child: const Text('Find Playlist'),
-          ),
-          const SizedBox(height: 20), // Add some spacing
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => FavoritesScreen(),
-                ),
-              );
-            },
-            child: const Text('Go to Favorites'),
-          ),
-          const SizedBox(height: 50),
-          ElevatedButton(
-            onPressed: isUserAuthenticated
-                ? null
-                : () => SpotifyAuth().authenticateWithSpotify(),
-            child: Text(isUserAuthenticated ? 'Connected to Spotify' : 'Connect to Spotify'),
-          ),
-        ],
+
             const SizedBox(height: 158),
+
+            // Mood selection dropdown
             DropdownButton<String>(
               value: selectedMood,
-              hint: const Text("Select your mood",
-                  style: TextStyle(color: Colors.white)),
-              dropdownColor: Color.fromARGB(255, 29, 1, 76),
+              hint: const Text(
+                "Select your mood",
+                style: TextStyle(color: Colors.white),
+              ),
+              dropdownColor: const Color.fromARGB(255, 29, 1, 76),
               style: const TextStyle(color: Colors.white),
               underline: Container(
                 height: 1.5,
@@ -162,24 +106,59 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
               items: const [
                 DropdownMenuItem(value: "Happy", child: Text("Happy")),
                 DropdownMenuItem(value: "Sad", child: Text("Sad")),
-                DropdownMenuItem(value: "Hopeful", child: Text("Hopeful")),
-                DropdownMenuItem(value: "Angry", child: Text("Angry")),
+                DropdownMenuItem(value: "Party", child: Text("Party")),
+                DropdownMenuItem(value: "Chill", child: Text("Chill")),
               ],
               onChanged: (value) {
                 setState(() {
                   selectedMood = value;
                 });
-
-                if (value != null) {
-                  // Navigate to the playlist screen with the selected mood
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PlaylistScreen(mood: value),
-                    ),
-                  );
-                }
               },
+            ),
+
+            const SizedBox(height: 20),
+
+            // Find Playlist button
+            ElevatedButton(
+              onPressed: selectedMood != null
+                  ? () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        PlaylistScreen(mood: selectedMood!),
+                  ),
+                );
+              }
+                  : null,
+              child: const Text('Find Playlist'),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Go to Favorites button
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => FavoritesScreen(),
+                  ),
+                );
+              },
+              child: const Text('Go to Favorites'),
+            ),
+
+            const SizedBox(height: 50),
+
+            // Spotify Authentication button
+            ElevatedButton(
+              onPressed: isUserAuthenticated
+                  ? null
+                  : () => SpotifyAuth().authenticateWithSpotify(),
+              child: Text(isUserAuthenticated
+                  ? 'Connected to Spotify'
+                  : 'Connect to Spotify'),
             ),
           ],
         ),

@@ -1,4 +1,4 @@
-//favoritesscreen.dart
+// favoritesscreen.dart
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -32,7 +32,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     return Future.value();
   }
 
-// Fetch or create the "Favorites from Moods" playlist
+  // Fetch or create the "Favorites from Moods" playlist
   Future<void> _fetchFavoritesPlaylist() async {
     setState(() {
       _isLoading = true;
@@ -60,7 +60,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
         if (createdPlaylistId != null && createdPlaylistId.isNotEmpty) {
           _favoritesPlaylistId = createdPlaylistId;
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Created Favorites playlist!")));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Created Favorites playlist!")),
+          );
           await _fetchTracksFromPlaylist(createdPlaylistId);
         } else {
           throw Exception("Failed to create playlist.");
@@ -74,7 +76,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     }
   }
 
-// Check if the "Favorites from Moods" playlist exists
+  // Check if the "Favorites from Moods" playlist exists
   Future<String?> _getFavoritesPlaylistId() async {
     final spotifyAuth = SpotifyAuth();
     final accessToken = spotifyAuth.accessToken;
@@ -93,13 +95,11 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       final data = jsonDecode(response.body);
       final playlists = data['items'] as List<dynamic>;
 
-      // Check if any playlist matches the "Favorites from Moods" name
       final playlist = playlists.firstWhere(
             (p) => p['name'] == "Favorites from Moods",
         orElse: () => null,
       );
 
-      // Return the playlist ID if found, otherwise return null
       return playlist?['id'];
     } else {
       throw Exception("Error fetching playlists: ${response.body}");
@@ -182,7 +182,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       setState(() {
         _favorites.add(track);
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Added to Favorites!")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Added to Favorites!")),
+      );
     }
   }
 
@@ -196,7 +198,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       setState(() {
         _favorites.removeWhere((item) => item['uri'] == track['uri']);
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Removed from Favorites!")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Removed from Favorites!")),
+      );
     }
   }
 
@@ -207,137 +211,107 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     } else {
       throw 'Could not launch $url';
     }
-    // Save the updated list back to SharedPreferences
-    await prefs.setString('favorites', jsonEncode(_favorites));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text("Removed from Favorites!"),
-      backgroundColor: Color.fromARGB(255, 29, 1, 76),
-    ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Favorites from Moods"),
-        title: const Text(
-          'Favorites',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Color.fromARGB(255, 29, 1, 76),
-        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text('Favorites from Moods'),
+        backgroundColor: const Color.fromARGB(255, 29, 1, 76),
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-          ? Center(child: Text(_errorMessage!, style: TextStyle(color: Colors.red)))
-          : _favorites.isEmpty  // Add check for empty favorites
-          ? Center(
-        child: Text(
-          "No favorites yet! Add some songs from your mood playlists.",
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16),
-        ),
-      )
-          : RefreshIndicator(
-        onRefresh: _refreshFavorites,
-        child: ListView.builder(
-          physics: AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
-          itemCount: _favorites.length,
-          itemBuilder: (context, index) {
-            final track = _favorites[index];
-            return ListTile(
-              title: Text(track['name'] ?? 'Unknown'),
-              subtitle: Text(track['artists'] ?? 'Unknown Artist'),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.remove_circle_outline, color: Colors.red),
-                    onPressed: () {
-                      _removeFromFavorites(track);
-                    },
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.open_in_new, color: Colors.green),
-                    onPressed: () {
-                      final url = track['url'];
-                      if (url != null) {
-                        _launchUrl(url);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("URL not available for this track")),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Color.fromARGB(255, 103, 58, 183),
               Color.fromARGB(255, 29, 1, 76),
-              Color.fromARGB(255, 29, 1, 76),
-              Color.fromARGB(255, 103, 58, 183),
             ],
             begin: Alignment.topRight,
             end: Alignment.bottomLeft,
           ),
         ),
-        child: _favorites.isEmpty
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _errorMessage != null
+            ? Center(
+          child: Text(
+            _errorMessage!,
+            style: const TextStyle(color: Colors.red),
+          ),
+        )
+            : _favorites.isEmpty
             ? const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.favorite_border_rounded,
+                  color: Colors.white, size: 50),
+              SizedBox(height: 20),
+              Text(
+                "No favorites added yet!",
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+            ],
+          ),
+        )
+            : ListView.builder(
+          itemCount: _favorites.length,
+          itemBuilder: (context, index) {
+            final track = _favorites[index];
+            return Card(
+              margin: const EdgeInsets.all(8.0),
+              color: Colors.white12,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              elevation: 4,
+              child: ListTile(
+                title: Text(track['name'] ?? 'Unknown',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                    )),
+                subtitle: Text(
+                  track['artists'] ?? 'Unknown Artist',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.favorite_border_rounded,
-                        color: Colors.white, size: 50),
-                    SizedBox(height: 20),
-                    Text(
-                      "No favorites added yet!",
-                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    IconButton(
+                      icon: const Icon(Icons.remove_circle_outline,
+                          color: Colors.red),
+                      onPressed: () {
+                        _removeFromFavorites(track);
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.open_in_new,
+                          color: Colors.green),
+                      onPressed: () {
+                        final url = track['url'];
+                        if (url != null) {
+                          _launchUrl(url);
+                        } else {
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    "URL not available for this track")),
+                          );
+                        }
+                      },
                     ),
                   ],
                 ),
-              )
-            : ListView.builder(
-                itemCount: _favorites.length,
-                itemBuilder: (context, index) {
-                  final favorite = _favorites[index];
-                  return Card(
-                    margin: const EdgeInsets.all(8.0),
-                    color: Colors.white12,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    elevation: 4,
-                    child: ListTile(
-                      title: Text(favorite['name'],
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          )),
-                      subtitle: Text(
-                        'Mood: ${favorite['mood']}',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.white70),
-                        onPressed: () {
-                          _removeFromFavorites(favorite['name']);
-                        },
-                      ),
-                    ),
-                  );
-                },
               ),
+            );
+          },
+        ),
       ),
     );
   }
