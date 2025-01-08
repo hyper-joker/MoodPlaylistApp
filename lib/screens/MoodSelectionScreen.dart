@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import './PlaylistScreen.dart';
 
 // Mood Selection Screen
@@ -27,6 +28,11 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final italicHeaderStyle = GoogleFonts.playfair(
+      fontSize: 30,
+      color: Colors.white,
+    );
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -52,13 +58,10 @@ class _MoodSelectionScreenState extends State<MoodSelectionScreen> {
                   bottomRight: Radius.circular(25),
                 ),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
                   "How are you feeling?",
-                  style: TextStyle(
-                    fontSize: 26,
-                    color: Colors.white,
-                  ),
+                  style: italicHeaderStyle,
                 ),
               ),
             ),

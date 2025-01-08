@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -39,7 +40,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
 
     // Save the updated list back to SharedPreferences
     await prefs.setString('favorites', jsonEncode(_favorites));
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Removed from Favorites!")));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text("Removed from Favorites!")));
   }
 
   @override
@@ -51,24 +53,24 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       body: _favorites.isEmpty
           ? const Center(child: Text("No favorites added yet!"))
           : ListView.builder(
-        itemCount: _favorites.length,
-        itemBuilder: (context, index) {
-          final favorite = _favorites[index];
-          return Card(
-            margin: const EdgeInsets.all(8.0),
-            child: ListTile(
-              title: Text(favorite['name']),
-              subtitle: Text('Mood: ${favorite['mood']}'),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete),
-                onPressed: () {
-                  _removeFromFavorites(favorite['name']);
-                },
-              ),
+              itemCount: _favorites.length,
+              itemBuilder: (context, index) {
+                final favorite = _favorites[index];
+                return Card(
+                  margin: const EdgeInsets.all(8.0),
+                  child: ListTile(
+                    title: Text(favorite['name']),
+                    subtitle: Text('Mood: ${favorite['mood']}'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        _removeFromFavorites(favorite['name']);
+                      },
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }
