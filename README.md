@@ -1,16 +1,30 @@
-# multi_platform_mobile_dev
+🎧 Mood Playlist App
+Mood Playlist is a web application that generates a personalized Spotify playlist based on your current mood. By selecting a mood from the UI, the app uses the Spotify API to curate a dynamic playlist that matches your emotional state — whether you're feeling happy, sad, energetic, relaxed, or anything in between.
 
-A new Flutter project.
+✨ Features
+🎵 Mood-based playlist generation
 
-## Getting Started
+🎧 Seamless Spotify login via OAuth
 
-This project is a starting point for a Flutter application.
+🔄 Real-time playlist refresh
 
-A few resources to get you started if this is your first Flutter project:
+🌈 Simple and responsive UI
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+🛠️ Built With
+Flutter – Frontend interface
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Flask – Backend server for handling Spotify OAuth and API calls
+
+Spotify Web API – For fetching tracks and generating playlists
+
+🚀 How It Works
+User logs in via Spotify
+
+Selects a mood from the UI
+
+App fetches relevant tracks and creates a playlist
+
+Playlist opens in the user's Spotify account
+
+📦 Getting Started
+Clone the repo and follow the setup instructions in the README to run the frontend and backend locally.
