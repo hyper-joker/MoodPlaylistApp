@@ -1,7 +1,7 @@
 🎧 Mood Playlist App
-Mood Playlist is a web application that generates a personalized Spotify playlist based on your current mood. By selecting a mood from the UI, the app uses the Spotify API to curate a dynamic playlist that matches your emotional state — whether you're feeling happy, sad, energetic, relaxed, or anything in between.
+Mood Playlist is a web application that generates a personalized Spotify playlist based on your current mood. By selecting a mood from the UI, the app uses the Spotify API to curate a dynamic playlist that matches your emotional state, whether you're feeling happy, sad, energetic, relaxed, or anything in between.
 
-✨ Features
+✨ Features:
 🎵 Mood-based playlist generation
 
 🎧 Seamless Spotify login via OAuth
@@ -10,21 +10,23 @@ Mood Playlist is a web application that generates a personalized Spotify playlis
 
 🌈 Simple and responsive UI
 
-🛠️ Built With
-Flutter – Frontend interface
+🛠️ Built With:
 
-Flask – Backend server for handling Spotify OAuth and API calls
+-Flutter – Frontend interface
 
-Spotify Web API – For fetching tracks and generating playlists
+-Flask – Backend server for handling Spotify OAuth and API calls
 
-🚀 How It Works
-User logs in via Spotify
+-Spotify Web API – For fetching tracks and generating playlists
 
-Selects a mood from the UI
+🚀 How It Works:
 
-App fetches relevant tracks and creates a playlist
+-User logs in via Spotify
 
-Playlist opens in the user's Spotify account
+-Selects a mood from the UI
 
-📦 Getting Started
+-App fetches relevant tracks and creates a playlist
+
+-Playlist opens in the user's Spotify account
+
+📦 Getting Started:
 Clone the repo and follow the setup instructions in the README to run the frontend and backend locally.
